@@ -1,7 +1,7 @@
 require 'rest_client'
 require 'json'
 class GetRsbeInfo
-  attr_reader :rsbe_info
+  attr_reader :rsbe_hsh
   def initialize(coll_path, user, pass)
     unless File.exist?(coll_path)
       raise RuntimeError, "#{coll_path} must exist"
@@ -9,7 +9,7 @@ class GetRsbeInfo
     @coll_path = coll_path
     @user = user
     @pass = pass
-    @rsbe_info = get_collection
+    @rsbe_hsh = get_collection
   end
 
   private

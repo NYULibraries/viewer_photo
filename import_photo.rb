@@ -108,19 +108,18 @@ def mongo_import(dir,hsh)
 end
 
 def get_collection(coll_path)
-  get_info = GetRsbeInfo.new(coll_path,ENV['RSBE_USER'],ENV['RSBE_PASS'])
-  get_info.rsbe_info
+  info = GetRsbeInfo.new(coll_path,ENV['RSBE_USER'],ENV['RSBE_PASS'])
+  info.rsbe_hsh
 end
 
 def process_import(args)
   photo_hsh = PhotoPage.get_photo_hsh(dir:args[:dir_name],path:args[:path])
-  case args[:import_type]
-  when "drupal only"
-    get_collection(args[:coll_path])
-  when "mongo only"
-    mongo_import(args[:dir_name],photo_hsh)
-  when "all"
-    get_collection(args[:coll_path])
+  if (args[:import_type] == "drupal only") || (args[:import_type] == "all")
+    s = get_collection(args[:coll_path])
+    binding.pry
+    # gen_drupal_json
+  end
+  if  (args[:import_type] == "mongo only") || (args[:import_type] == "all")
     mongo_import(args[:dir_name],photo_hsh)
   end
 end
