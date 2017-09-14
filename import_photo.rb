@@ -112,20 +112,43 @@ def get_collection(coll_path)
   info.rsbe_hsh
 end
 
+def gen_hsh_config(config)
+  hsh = {}
+  File.foreach(config) do |line|
+    line.chomp!
+    unless line =~ /=/
+     raise RuntimeError, "#{@config} entry must have a delimiter of '='\n"
+    end
+    key,value = line.split("=")
+    hsh[key] = value
+  end
+  hsh = hsh.map { |k, v| [k.to_sym, v] }.to_h
+end
+
 def process_import(args)
   photo_hsh = PhotoPage.get_photo_hsh(dir:args[:dir_name],path:args[:path])
   if (args[:import_type] == "drupal only") || (args[:import_type] == "all")
-    s = get_collection(args[:coll_path])
-    binding.pry
-    # gen_drupal_json
+    coll_info = get_collection(args[:coll_path])
+    coll_info[:dir_name] = args[:dir_name]
+    @drupal_config_hsh = gen_hsh_config(@drupal_config)
+    gen_drupal_json(coll_info,photo_hsh)
   end
-  if  (args[:import_type] == "mongo only") || (args[:import_type] == "all")
+
+  if (args[:import_type] == "mongo only") || (args[:import_type] == "all")
     mongo_import(args[:dir_name],photo_hsh)
   end
 end
+
+def gen_drupal_json(coll_info, photo_hsh)
+  d = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
+  binding.pry
+end
+
+
 @mongo_only = ["mongo only"]
 @others = ["drupal only", "all"]
 args = parse_args
 validate_args(args)
 @mongo_config = "config/.mongo"
+@drupal_config = "config/.drupal"
 process_import(args)

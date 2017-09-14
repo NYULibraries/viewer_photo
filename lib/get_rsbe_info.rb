@@ -23,8 +23,10 @@ class GetRsbeInfo
     partner_info = get_partner(rsbe_info["partner_url"])
     coll_info = {:coll_code => rsbe_info["code"],
                  :coll_name => rsbe_info["name"],
+                 :coll_identifier => rsbe_info["id"],
                  :partner_code => partner_info["code"],
-                 :partner_name => partner_info["name"]
+                 :partner_name => partner_info["name"],
+                 :partner_id => rsbe_info["partner_id"]
     }
   end
 
