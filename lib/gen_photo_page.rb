@@ -19,9 +19,10 @@ class PhotoPage
   end
 
   def self.get_pages(files)
+    sorted_files = files.sort { |a,b| a <=> b }
     photo_pages = []
     order = 1;
-    files.each { |f|
+    sorted_files.each { |f|
       filename = File.basename(f)
       photo_pages << gen_page_hsh(filename,@dir,order)
       order += 1

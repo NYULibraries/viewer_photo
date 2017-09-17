@@ -141,7 +141,15 @@ end
 
 def gen_drupal_json(coll_info, photo_hsh)
   d = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
+  d.sample_drupal_output = get_sample_json
+  d.gen_drupal_json
+  d.drupal_json_output
   binding.pry
+end
+
+def get_sample_json
+  file_input = File.read(@sample_drupal_output)
+  JSON.parse file_input.gsub('=>',':')
 end
 
 
@@ -151,4 +159,5 @@ args = parse_args
 validate_args(args)
 @mongo_config = "config/.mongo"
 @drupal_config = "config/.drupal"
+@sample_drupal_output = "config/sample_drupal_json_output_hsh"
 process_import(args)
