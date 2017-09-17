@@ -131,7 +131,8 @@ def process_import(args)
     coll_info = get_collection(args[:coll_path])
     coll_info[:dir_name] = args[:dir_name]
     @drupal_config_hsh = gen_hsh_config(@drupal_config)
-    gen_drupal_json(coll_info,photo_hsh)
+    json = gen_drupal_json(coll_info,photo_hsh)
+    output_drupal_json(json,args[:dir_name])
   end
 
   if (args[:import_type] == "mongo only") || (args[:import_type] == "all")
@@ -140,13 +141,25 @@ def process_import(args)
 end
 
 def gen_drupal_json(coll_info, photo_hsh)
-  d = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
-  d.sample_drupal_output = get_sample_json
-  d.gen_drupal_json
-  d.drupal_json_output
-  binding.pry
+  drupal = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
+  drupal.sample_drupal_output = get_sample_json
+  drupal.gen_drupal_json
+  drupal
 end
 
+def output_drupal_json(json,filename)
+  output_dir = json.output_dir
+  unless Dir.exist?(output_dir)
+    raise RuntimeError, "#{output_dir} must exist"
+  end
+  begin
+    File.open("#{output_dir}/#{filename}.json","w+") do |f|
+      f.write(JSON.generate(json.drupal_json_output))
+    end
+  rescue Exception => err
+    raise RuntimeError, err
+  end
+end
 def get_sample_json
   file_input = File.read(@sample_drupal_output)
   JSON.parse file_input.gsub('=>',':')

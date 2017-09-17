@@ -1,6 +1,6 @@
 class GetDrupalJson
   attr_accessor :sample_drupal_output
-  attr_reader :drupal_json_output
+  attr_reader :drupal_json_output, :output_dir
 
   def initialize(coll_info,photo_hsh,config)
     @coll_info = coll_info
@@ -13,6 +13,7 @@ class GetDrupalJson
     create_header
     gen_metadata
     @drupal_json_output = @drupal_hsh
+    @output_dir = @config[:output_dir]
   end
 
   private
