@@ -4,38 +4,60 @@ include Mongo
 class ImportMongo
   URL_PREFIX = "mongodb://"
   def self.import(dir:,url:, photo_pg_hsh:,config:)
+    success = false
+    @error_msg = []
     @mongo_url = url
     @dir = dir
     @photo_pages = photo_pg_hsh
     @config = config
-    @mongo_config = get_mongo_path
-    @client = connect_mongo
-    coll_exist =  chk_collection_existence
-    if chk_collection_existence
-      @photos = find_photo
-      import_photos
+    @mongo_config = {}
+    chk = chk_config
+    if chk
+      @mongo_config = get_mongo_path
     else
-       raise RuntimeError, "Collection: #{@mongo_config["MONGO_COLL"]} doesn't exist"
+      @error_msg << "#{@config} must exist"
     end
+    unless @mongo_config.empty?
+      @client = connect_mongo
+      coll_exist =  chk_collection_existence
+      if chk_collection_existence
+        @photos = find_photo
+        import_photos
+      else
+        @error_msg << "Collection: #{@mongo_config["MONGO_COLL"]} doesn't exist"
+      end
+    end
+    @error_msg.each { |e|
+      LOG.error(e)
+    }
+    success = true if @error_msg.size == 0
+    success
   end
 
   def self.get_mongo_path
     mongo_config = {}
-    File.foreach(@config) { |line|
-      line.chomp!
-      unless line =~ /=/
-       raise RuntimeError, "#{@config} entry must have a delimiter of '='\n"
-      end
-      key,value = line.split("=")
-      unless validate_config.include?(key)
-       raise RuntimeError, "#{validate_config} should be the keys in #{@config} file\n"
-      end
-      if value.nil?
-       raise RuntimeError, "value can not be nil\n"
-      end
-      mongo_config[key] = value
-    }
-    mongo_config["MONGO_URL"] = URL_PREFIX + @mongo_url
+    begin
+      File.foreach(@config) { |line|
+        line.chomp!
+        unless line =~ /=/
+          @error_msg << "#{@config} entry must have a delimiter of '='\n"
+          caller.each { |c|
+            @error_msg << c
+          }
+        end
+        key,value = line.split("=")
+        unless validate_config.include?(key)
+          @error_msg << "#{validate_config} should be the keys in #{@config} file"
+        end
+        if value.nil?
+          @error_msg << "value can not be nil"
+        end
+        mongo_config[key] = value
+      }
+      mongo_config["MONGO_URL"] = URL_PREFIX + @mongo_url
+    rescue Exception => e
+      @error_msg << e
+    end
     mongo_config
   end
 
@@ -43,22 +65,30 @@ class ImportMongo
     begin
       @client[:"#{@mongo_config["MONGO_COLL"]}"].find(:isPartOf => "#{@dir}")
     rescue Exception => e
-      puts e.message
+      @error_msg << e.message
     end
   end
 
   def self.import_photos
     if @photos.count > 0
-      @photos.delete_many
+      begin
+        @photos.delete_many
+      rescue Exception => err
+        @error_msg << err
+      end
     end
-    @client[:"#{@mongo_config["MONGO_COLL"]}"].insert_many(@photo_pages)
+    begin
+      @client[:"#{@mongo_config["MONGO_COLL"]}"].insert_many(@photo_pages)
+    rescue Exception => err
+      @error_msg << err
+    end
   end
 
   def self.connect_mongo
     begin
-     Mongo::Client.new(@mongo_config["MONGO_URL"])
+      Mongo::Client.new(@mongo_config["MONGO_URL"])
     rescue Exception => e
-      puts e.message
+      @error_msg << e.message
     end
   end
 
@@ -67,9 +97,9 @@ class ImportMongo
   end
 
   def self.chk_config
-    unless File.exist?(@config)
-     raise RuntimeError, "#{@config} must exist\n"
-    end
+    chk = false
+    chk = true if File.exist?(@config)
+    chk
   end
 
   def self.chk_collection_existence

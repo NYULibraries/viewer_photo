@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'optparse'
 require 'pry'
+require 'logger'
 Dir["./lib/*.rb"].each {|file| require file }
 
 def err_exit
@@ -88,6 +89,14 @@ def chk_import_type(type,errors)
 
   errors
 end
+def chk_dir_existence(path,dir)
+  status = false
+  se = "#{path}/#{dir}"
+  if Dir.exist?(se)
+    status = true
+  end
+  status
+end
 
 def validate_args(args)
   errors = []
@@ -100,69 +109,10 @@ def validate_args(args)
   if args[:import_type]
     chk_import_type(args[:import_type],errors)
   end
+  chk_dir = chk_dir_existence(args[:path],args[:dir_name])
+  errors << "#{args[:path]}/#{args[:dir_name]} must exist" unless chk_dir
+
   print_usage_err_exit(errors.join("\n")) unless errors.empty?
-end
-
-def mongo_import(dir,hsh)
-  ImportMongo.import(dir:dir, url: ENV['MONGO_URL'], photo_pg_hsh:hsh,config:@mongo_config)
-end
-
-def get_collection(coll_path)
-  info = GetRsbeInfo.new(coll_path,ENV['RSBE_USER'],ENV['RSBE_PASS'])
-  info.rsbe_hsh
-end
-
-def gen_hsh_config(config)
-  hsh = {}
-  File.foreach(config) do |line|
-    line.chomp!
-    unless line =~ /=/
-     raise RuntimeError, "#{@config} entry must have a delimiter of '='\n"
-    end
-    key,value = line.split("=")
-    hsh[key] = value
-  end
-  hsh = hsh.map { |k, v| [k.to_sym, v] }.to_h
-end
-
-def process_import(args)
-  photo_hsh = PhotoPage.get_photo_hsh(dir:args[:dir_name],path:args[:path])
-  if (args[:import_type] == "drupal only") || (args[:import_type] == "all")
-    coll_info = get_collection(args[:coll_path])
-    coll_info[:dir_name] = args[:dir_name]
-    @drupal_config_hsh = gen_hsh_config(@drupal_config)
-    json = gen_drupal_json(coll_info,photo_hsh)
-    output_drupal_json(json,args[:dir_name])
-  end
-
-  if (args[:import_type] == "mongo only") || (args[:import_type] == "all")
-    mongo_import(args[:dir_name],photo_hsh)
-  end
-end
-
-def gen_drupal_json(coll_info, photo_hsh)
-  drupal = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
-  drupal.sample_drupal_output = get_sample_json
-  drupal.gen_drupal_json
-  drupal
-end
-
-def output_drupal_json(json,filename)
-  output_dir = json.output_dir
-  unless Dir.exist?(output_dir)
-    raise RuntimeError, "#{output_dir} must exist"
-  end
-  begin
-    File.open("#{output_dir}/#{filename}.json","w+") do |f|
-      f.write(JSON.generate(json.drupal_json_output))
-    end
-  rescue Exception => err
-    raise RuntimeError, err
-  end
-end
-def get_sample_json
-  file_input = File.read(@sample_drupal_output)
-  JSON.parse file_input.gsub('=>',':')
 end
 
 def create_import_photo_hsh(args)
@@ -183,6 +133,7 @@ validate_args(args)
 @mongo_config = "#{Dir.pwd}/config/.mongo"
 @drupal_config = "#{Dir.pwd}/config/.drupal"
 @sample_drupal_output = "#{Dir.pwd}/config/sample_drupal_json_output_hsh"
+LOG = Logger.new("logs/import_#{Time.now.to_i}.txt")
+LOG.info("Starting: #{args[:dir_name]}")
 run_hsh = create_import_photo_hsh(args)
 ProcessImportPhoto.run(run_hsh)
-#process_import(args)

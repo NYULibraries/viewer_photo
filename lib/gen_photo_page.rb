@@ -1,19 +1,22 @@
 class PhotoPage
   def self.get_photo_hsh(dir:,path:)
+    hsh = {}
     @dir = dir
     @path = path
     @full_path = "#{@path}/#{@dir}/aux"
     unless File.exist?(@full_path)
-      raise RuntimeError, "#{@full_path} must exist\n"
+      LOG.error("#{@full_path} must exist")
+    else
+      jp2 = get_jp2
+      hsh = get_pages(jp2)
     end
-    jp2 = get_jp2
-    get_pages(jp2)
+    hsh
   end
 
   def self.get_jp2
     files = Dir.glob("#{@full_path}/*jp2")
     if files.count == 0
-     raise RuntimeError, "jp2 files mist exist here: #{@path}/#{@dir}/aux/\n"
+      LOG.error("jp2 files mist exist here: #{@path}/#{@dir}/aux/")
     end
     files
   end
