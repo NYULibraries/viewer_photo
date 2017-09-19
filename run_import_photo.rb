@@ -165,12 +165,24 @@ def get_sample_json
   JSON.parse file_input.gsub('=>',':')
 end
 
+def create_import_photo_hsh(args)
+  { :args => args,
+    :mongo_config => @mongo_config,
+    :mongo_url => ENV['MONGO_URL'],
+    :rsbe_user => ENV['RSBE_USER'],
+    :rsbe_pass => ENV['RSBE_PASS'],
+    :sample_drupal_output => @sample_drupal_output,
+    :drupal_config => @drupal_config
+  }
+end
 
 @mongo_only = ["mongo only"]
 @others = ["drupal only", "all"]
 args = parse_args
 validate_args(args)
-@mongo_config = "config/.mongo"
-@drupal_config = "config/.drupal"
-@sample_drupal_output = "config/sample_drupal_json_output_hsh"
-process_import(args)
+@mongo_config = "#{Dir.pwd}/config/.mongo"
+@drupal_config = "#{Dir.pwd}/config/.drupal"
+@sample_drupal_output = "#{Dir.pwd}/config/sample_drupal_json_output_hsh"
+run_hsh = create_import_photo_hsh(args)
+ProcessImportPhoto.run(run_hsh)
+#process_import(args)
