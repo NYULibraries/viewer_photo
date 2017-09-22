@@ -9,6 +9,7 @@ class GetDrupalJson
   end
 
   def gen_drupal_json
+    @error_msg = []
     @drupal_hsh = sample_drupal_output
     create_header
     gen_metadata
@@ -24,6 +25,18 @@ class GetDrupalJson
      @drupal_hsh["entity_status"] = @config[:entity_status]
      @drupal_hsh["entity_type"] = @config[:entity_type]
     @drupal_hsh
+  end
+  def read_handle_file
+    handle = nil
+    begin
+      handle = File.read(@coll_info[:handle])
+    rescue Exception => e
+      @error_msg << e
+      caller.each { |c|
+        @error_msg << c
+      }
+    end
+    handle.chomp! if handle
   end
 
   def gen_metadata
@@ -70,7 +83,9 @@ class GetDrupalJson
   end
 
   def get_handle
-    @metadata["handle"]["value"] << "Add some handle reading code here"
+    handle_url = "http://hdl.handle.net"
+    noid = read_handle_file
+    @metadata["handle"]["value"] << "#{handle_url}/#{noid}"
   end
 
   def get_page_info

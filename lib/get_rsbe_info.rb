@@ -15,7 +15,15 @@ class GetRsbeInfo
   private
   def get_collection
     coll_info = {}
-    @coll_url = File.read(@coll_path)
+    p @coll_path
+    begin
+      @coll_url = File.read(@coll_path)
+    rescue Exception => e
+      LOG.error(e)
+      caller.each { |c|
+       LOG.error(c)
+      }
+    end
     @coll_url.chomp!
     url = parse_url(@coll_url)
     rsp,status = get(url)

@@ -98,6 +98,17 @@ def chk_dir_existence(path,dir)
   status
 end
 
+def chk_file_existence(path)
+  status = false
+  status = true if File.exist?(path)
+end
+
+def chk_handle(path,dir)
+  status = false
+  handle_file = "#{path}/#{dir}/handle"
+  status = true if chk_file_existence(handle_file)
+end
+  
 def validate_args(args)
   errors = []
   errors << 'ERROR: missing argument: path' if args[:path].nil?
@@ -108,15 +119,19 @@ def validate_args(args)
   errors << 'ERROR: missing argument: import_type' if args[:import_type].nil?
   if args[:import_type]
     chk_import_type(args[:import_type],errors)
+    if args[:import_type] == "drupal only" or args[:import_type] == "all"
+      chk_file = chk_handle(args[:path],args[:dir_name])
+      errors << "Handle file: #{args[:path]}/#{args[:dir_name]}/handle must exist" unless chk_file
+    end  
   end
   chk_dir = chk_dir_existence(args[:path],args[:dir_name])
   errors << "#{args[:path]}/#{args[:dir_name]} must exist" unless chk_dir
-
+  
   print_usage_err_exit(errors.join("\n")) unless errors.empty?
 end
 
 def create_import_photo_hsh(args)
-  { :args => args,
+  hsh = { :args => args,
     :mongo_config => @mongo_config,
     :mongo_url => ENV['MONGO_URL'],
     :rsbe_user => ENV['RSBE_USER'],
@@ -124,6 +139,10 @@ def create_import_photo_hsh(args)
     :sample_drupal_output => @sample_drupal_output,
     :drupal_config => @drupal_config
   }
+  unless args[:import_type] == "mongo only"
+    hsh = hsh.merge ({ :handle => "#{args[:path]}/#{args[:dir_name]}/handle" })
+  end
+  hsh
 end
 
 @mongo_only = ["mongo only"]

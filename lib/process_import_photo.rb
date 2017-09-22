@@ -37,7 +37,8 @@ class ProcessImportPhoto
 
   def self.chk_options_keys(options)
     status = true
-    unless options.keys.sort == required_keys.sort
+    all_keys = required_keys + optional_keys
+    unless options.keys.sort == all_keys.sort
       @error_msg << "#{required_keys.join(", ")} must be arguments."
       @error_msg << "Stack Trace:"
       caller.each { |c|
@@ -47,7 +48,7 @@ class ProcessImportPhoto
     end
 
     options.keys.each { |o|
-      unless required_keys.include?(o)
+      unless all_keys.include?(o)
         status = false
         @error_msg << "#{options.keys} must match #{required_keys}"
         @error_msg << "Stack Trace:"
@@ -61,6 +62,10 @@ class ProcessImportPhoto
 
   def self.required_keys
     [:args, :rsbe_user, :rsbe_pass, :mongo_url, :sample_drupal_output, :drupal_config, :mongo_config]
+  end
+  
+  def self.optional_keys
+    [:handle]
   end
 
   def self.chk_required_values(options)
@@ -140,7 +145,8 @@ class ProcessImportPhoto
   end
 
   def self.gen_drupal_json(coll_info, photo_hsh)
-    drupal = GetDrupalJson.new(coll_info,photo_hsh,@drupal_config_hsh)
+    coll_hsh = coll_info.merge({:handle => @handle})
+    drupal = GetDrupalJson.new(coll_hsh,photo_hsh,@drupal_config_hsh)
     drupal.sample_drupal_output = get_sample_json
     unless drupal.sample_drupal_output.nil?
       drupal.gen_drupal_json
@@ -180,5 +186,5 @@ class ProcessImportPhoto
     json = JSON.parse file_input.gsub('=>',':') if file_input
   end
 
-  private_class_method :get_sample_json, :output_drupal_json, :gen_drupal_json, :process_import, :gen_hsh_config, :get_collection, :mongo_import, :chk_required_values, :set_instance_vars, :required_keys, :chk_options_keys, :validate_args
+  private_class_method :get_sample_json, :output_drupal_json, :gen_drupal_json, :process_import, :gen_hsh_config, :get_collection, :mongo_import, :chk_required_values, :set_instance_vars, :required_keys, :chk_options_keys, :validate_args, :optional_keys
 end
