@@ -63,7 +63,7 @@ class ProcessImportPhoto
   def self.required_keys
     [:args, :rsbe_user, :rsbe_pass, :mongo_url, :sample_drupal_output, :drupal_config, :mongo_config]
   end
-  
+
   def self.optional_keys
     [:handle]
   end
