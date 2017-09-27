@@ -57,7 +57,7 @@ def parse_args
     opts.banner = usage
     opts.on('-p', '--path PATH', '(required)') { |x| args[:path] = x }
     opts.on('-c', '--coll-path PATH TO FILE CONTAINING COLL URL', '(required for two import types)') { |x| args[:coll_path] = x }
-    opts.on('-d', '--dir_name DIR', '(required)') { |x| args[:dir_name] = x }
+    opts.on('-f', '--file_name FILE', '(required)') { |x| args[:file] = x }
     opts.on('-i', '--import_type DRUPAL', '(required)') { |x| args[:import_type] = x.downcase }
   end.parse!
   args
@@ -82,12 +82,11 @@ def check_env_var(import_type)
   status
 end
 
-def chk_import_type(type,errors)
-  errors << "ERROR: import type must be one of these: #{usage_import_types}" unless validate_import_type(type)
+def chk_import_type(type)
+  @errors << "ERROR: import type must be one of these: #{usage_import_types}" unless validate_import_type(type)
 
-  errors << "ERROR: env var: MONGO_URL, RSBE_USER, RSBE_PASS must be set" unless check_env_var(type)
+  @errors << "ERROR: env var: MONGO_URL, RSBE_USER, RSBE_PASS must be set" unless check_env_var(type)
 
-  errors
 end
 def chk_dir_existence(path,dir)
   status = false
@@ -108,40 +107,41 @@ def chk_handle(path,dir)
   handle_file = "#{path}/#{dir}/handle"
   status = true if chk_file_existence(handle_file)
 end
-  
+
 def validate_args(args)
-  errors = []
-  errors << 'ERROR: missing argument: path' if args[:path].nil?
+  @errors = []
+  @errors << 'ERROR: missing argument: path' if args[:path].nil?
   if args[:coll_path].nil? and @others.include?(args[:import_type])
-    errors << 'ERROR: missing argument: collection path' if args[:coll_path].nil?
+    @errors << 'ERROR: missing argument: collection path' if args[:coll_path].nil?
   end
-  errors << 'ERROR: missing argument: dir_name' if args[:dir_name].nil?
-  errors << 'ERROR: missing argument: import_type' if args[:import_type].nil?
-  if args[:import_type]
-    chk_import_type(args[:import_type],errors)
-    if args[:import_type] == "drupal only" or args[:import_type] == "all"
-      chk_file = chk_handle(args[:path],args[:dir_name])
-      errors << "Handle file: #{args[:path]}/#{args[:dir_name]}/handle must exist" unless chk_file
-    end  
-  end
-  chk_dir = chk_dir_existence(args[:path],args[:dir_name])
-  errors << "#{args[:path]}/#{args[:dir_name]} must exist" unless chk_dir
-  
-  print_usage_err_exit(errors.join("\n")) unless errors.empty?
+  @errors << 'ERROR: missing argument: import_type' if args[:import_type].nil?
+  @errors << "ERROR: #{args[:file]} doesn't exist" unless File.exist?(args[:file])
 end
 
-def create_import_photo_hsh(args)
+def validate_dir(dir,args)
+  if args[:import_type]
+    chk_import_type(args[:import_type])
+    if args[:import_type] == "drupal only" or args[:import_type] == "all"
+      chk_file = chk_handle(args[:path],dir)
+      @errors << "Handle file: #{args[:path]}/#{dir}/handle must exist" unless chk_file
+    end
+  end
+  chk_dir = chk_dir_existence(args[:path],dir)
+  @errors << "#{args[:path]}/#{dir} must exist" unless chk_dir
+
+end
+def create_import_photo_hsh(dir,args)
+  args.delete(:file)
+  args.merge!({:dir_name => dir})
   hsh = { :args => args,
     :mongo_config => @mongo_config,
     :mongo_url => ENV['MONGO_URL'],
     :rsbe_user => ENV['RSBE_USER'],
     :rsbe_pass => ENV['RSBE_PASS'],
     :sample_drupal_output => @sample_drupal_output,
-    :drupal_config => @drupal_config
+    :drupal_config => @drupal_config,
+    :handle => "#{args[:path]}/#{args[:dir_name]}/handle"
   }
-  unless args[:import_type] == "mongo only"
-    hsh = hsh.merge ({ :handle => "#{args[:path]}/#{args[:dir_name]}/handle" })
-  end
   hsh
 end
 
@@ -149,10 +149,16 @@ end
 @others = ["drupal only", "all"]
 args = parse_args
 validate_args(args)
+print_usage_err_exit(@errors.join("\n")) unless @errors.empty?
 @mongo_config = "#{Dir.pwd}/config/.mongo"
 @drupal_config = "#{Dir.pwd}/config/.drupal"
 @sample_drupal_output = "#{Dir.pwd}/config/sample_drupal_json_output_hsh"
 LOG = Logger.new("logs/import_#{Time.now.to_i}.txt")
-LOG.info("Starting: #{args[:dir_name]}")
-run_hsh = create_import_photo_hsh(args)
-ProcessImportPhoto.run(run_hsh)
+File.foreach(args[:file]) do |dir|
+  dir.chomp!
+  validate_dir(dir,args)
+  print_usage_err_exit(@errors.join("\n")) unless @errors.empty?
+  run_hsh = create_import_photo_hsh(dir,args)
+  LOG.info("Starting: #{args[:dir_name]}")
+  ProcessImportPhoto.run(run_hsh)
+end
