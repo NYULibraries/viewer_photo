@@ -54,7 +54,7 @@ class GetDrupalJson
   end
 
   def gen_coll
-    coll_md = @metadata["collection"]["value"]
+    coll_md = @metadata["collection"]["value"][0]
     coll_md["title"] = @coll_info[:coll_name]
     coll_md["identifier"] = @coll_info[:coll_identifier]
     coll_md["code"] = @coll_info[:coll_code]
@@ -67,7 +67,7 @@ class GetDrupalJson
   end
 
   def coll_partner_info
-    coll_partner = @metadata["collection"]["value"]["partner"]
+    coll_partner = @metadata["collection"]["value"][0]["partner"]
     coll_partner["title"] = @coll_info[:partner_name]
     coll_partner["code"] = @coll_info[:partner_code]
     coll_partner["identifier"] = @coll_info[:partner_id]
@@ -75,7 +75,7 @@ class GetDrupalJson
   end
 
   def partner_hsh_info
-    partner_info = @metadata["partner"]["value"]
+    partner_info = @metadata["partner"]["value"][0]
     partner_info["title"] = @coll_info[:partner_name]
     partner_info["code"] = @coll_info[:partner_code]
     partner_info["name"] = @coll_info[:partner_name]
