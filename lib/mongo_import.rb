@@ -19,13 +19,8 @@ class ImportMongo
     end
     unless @mongo_config.empty?
       @client = connect_mongo
-      coll_exist =  chk_collection_existence
-      if chk_collection_existence
-        @photos = find_photo
-        import_photos
-      else
-        @error_msg << "Collection: #{@mongo_config["MONGO_COLL"]} doesn't exist"
-      end
+      @photos = find_photo
+      import_photos
     end
     @error_msg.each { |e|
       LOG.error(e)
