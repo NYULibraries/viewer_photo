@@ -1,12 +1,22 @@
 The Readme.md details how to run the scripts that generate jsons and populates the NoSQL database.
 
-This page documents the entire photo publishing Workflow. It involves traversal of a few hosts.
+## Workflow Overview
+This page documents the entire photo publishing Workflow.
+* [Backup mongodb](#backup-the-mongodb)
+* [Run the viewer_photo script](#run-the-script)
+* [Import to Viewer](#continuing-on-to-the-drupal-hosts)
+* [Run handles](#handle-updates)
+* [ASpace DO Update](#aspace-do-update): **Contact ACM before doing this**
+
+These links are for your convenience, but please read the details below.
+
+It involves traversal of a few hosts.
 Starting your voyage now.... :sailboat:
-Be sure to have your passport and visa. :smiley:
+
 
 The user publishing the images does the following.
 
-* Backup the mongodb database before import - this is on the host that contain the mongodb hosts.
+##### Backup the mongodb database before import - this is on the host that contain the mongodb hosts.
 
 ### On the host which has the viewer_photo script
 * Once a ticket is assigned to the user, they get a list of SEs from the JIRA ticket. The user  creates a directory with the jira ticket as its name. For ex: DLTSIMAGES-226 on the host where the viewer_photo scripts are run.
@@ -14,7 +24,8 @@ The user publishing the images does the following.
     * **se_list**: containing the list of SEs to be published
     * **wip_path**: contains just one line: the path to the wip
     * **collection_url**: one line: the path to the collection url file
-* The user `cd`s to the directory containing the publishing scripts and runs either the [wrapper](./README.md#workflow-setup) script or calls it [directly](./README.md#calling-the-script-directly).
+* ##### Run the script
+The user `cd`s to the directory containing the publishing scripts and runs either the [wrapper](./README.md#workflow-setup) script or calls it [directly](./README.md#calling-the-script-directly).
 * Once the user has ensured that the script ran correctly, they create a tarball of the json files generated and copy it to the `*sites` host where the jsons will populate the viewer database
 ### Continuing on to the drupal hosts
 * Untar the tar ball in a directory.
