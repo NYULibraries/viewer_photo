@@ -14,7 +14,7 @@ The user publishing the images does the following.
     * **se_list**: containing the list of SEs to be published
     * **wip_path**: contains just one line: the path to the wip
     * **collection_url**: one line: the path to the collection url file
-* The user `cd`s to the directory containing the publishing scripts and runs either the [wrapper](./Readme.md#workflow-setup) script or calls it [directly](./Readme.md#calling-the-script-directly).
+* The user `cd`s to the directory containing the publishing scripts and runs either the [wrapper](Readme.md#workflow-setup) script or calls it [directly](Readme.md#calling-the-script-directly).
 * Once the user has ensured that the script ran correctly, they create a tarball of the json files generated and copy it to the `*sites` host where the jsons will populate the viewer database
 ### Continuing on to the drupal hosts
 * Untar the tar ball in a directory.
