@@ -1,1 +1,54 @@
 Script reads a wip and imports a photo document into the dlts_photo collection for the viewer workflow
+
+## Requirements
+#### Ruby version 2.4.1
+
+## Script Setup
+* Install rvm, if not present, from [here](https://rvm.io/rvm/install)
+* Install ruby v.2.4.1:
+   `$ rvm install ruby-2.4.1`
+* The .ruby-gemset file in the directory will automatically create a gemset
+* Install bundle: `gem install bundle`
+* Install required gems by running the command: `$ bundle`
+* Set up 3 environment variables
+    * `export RSBE_USER=user name value`
+    * `export RSBE_PASS=password value`
+    * `export MONGO_URL=/path/tomongodb`
+
+## Workflow Setup
+* The publishing workflow can be run two ways: either with a wrapper script or calling the script directly.
+#### The wrapper script
+* The wrapper script requires an input directory with specific files. For example: if a directory called publish-me is created, the following files are needed:
+```
+$ ls publish-me
+se_list
+wip_path
+collection_url
+```
+* **se_list**: list of SEs to be published
+* **wip_path**: /path to wip/
+* **collection_url**: /collection url/
+* The script then should be called the following way:
+```
+cd /to/viewer_photo/repo
+ruby import_photo.rb /path/to/publish-me import-type-parameter
+```
+* There are 3 acceptable import types:
+    * mongo only
+        * only updates the mongo database, does not create jsons which will populate the viewer database
+    * all
+       * updates the mongo database and generates jsons
+    * drupal only
+        * only generates jsons
+
+ #### Example call to script:
+ `$ ruby import_photo.rb /path/publish-me all`
+ #### Expected output
+ With the import type paramenter **all**, the user should expect json files to be generated in the json/ directory and get output statements of the mongodb transactions.
+
+#### Calling the script directly
+If the user doesn't want to use the wrapper script, the script can be called directly by specifying the following parameters:
+* with import type parameter **all** or **drupal only**:
+    * `ruby run_import_photo.rb -p /path/to/wip -i "all" -f /path/to/se_list -c "path/to/collection url"`
+* with import type parameter **mongo only**:
+    * `ruby run_import_photo.rb -p /path/to/wip -i "mongo only" -f /path/to/se_list`
