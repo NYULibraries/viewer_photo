@@ -2,7 +2,7 @@ The Readme.md details how to run the scripts that generate jsons and populates t
 
 ## Workflow Overview
 This page documents the entire photo publishing Workflow.
-* [Backup mongodb](#mongoDB backup)
+* [Backup mongodb](#mongodb-backup)
 * [Run the viewer_photo script](#run-the-script)
 * [Import to Viewer](#continuing-on-to-the-drupal-hosts)
 * [Run handles](#handle-updates)
@@ -16,7 +16,7 @@ Starting your voyage now.... :sailboat:
 
 The user publishing the images does the following.
 
-##### MongoDB backup
+##### Mongodb backup
 This is before import. This is on the host that contain the mongodb hosts.
 
 ### On the host which has the viewer_photo script
