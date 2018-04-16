@@ -17,7 +17,7 @@ Starting your voyage now.... :sailboat:
 The user publishing the images does the following.
 
 ##### Mongodb backup
-This is before import. This is on the host that contain the mongodb hosts.
+This is before import. This is on the host that contain the mongo databases.
 
 ### On the host which has the viewer_photo script
 * Once a ticket is assigned to the user, they get a list of SEs from the JIRA ticket. The user  creates a directory with the jira ticket as its name. For ex: DLTSIMAGES-226 on the host where the viewer_photo scripts are run.
