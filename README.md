@@ -1,5 +1,6 @@
 Script reads a wip and imports a photo document into the dlts_photo collection for the viewer workflow
 
+To get an overview of the full image publishing workflow, please see here: [Photo_Publishing_Workflow](./Photo_Publishing_Workflow.md)
 Links:
 * [Script Setup](#script-setup)
 * [Workflow Setup](#workflow-setup)
