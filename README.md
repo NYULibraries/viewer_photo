@@ -1,5 +1,11 @@
 Script reads a wip and imports a photo document into the dlts_photo collection for the viewer workflow
 
+Links:
+* [Script Setup](#script-setup)
+* [Workflow Setup](#workflow-setup)
+   * [Wrapper Script](#the-wrapper-script)
+   * [Call script directly](#calling-the-script-directly)
+
 ## Requirements
 #### Ruby version 2.4.1
 
@@ -48,7 +54,9 @@ ruby import_photo.rb /path/to/publish-me import-type-parameter
 
 #### Calling the script directly
 If the user doesn't want to use the wrapper script, the script can be called directly by specifying the following parameters:
-* with import type parameter **all** or **drupal only**:
-    * `ruby run_import_photo.rb -p /path/to/wip -i "all" -f /path/to/se_list -c "path/to/collection url"`
+* with import type parameter **all**:
+    * `ruby run_import_photo.rb -p /path/to/wip -i "all" -f /path/to/file/containing/se_list -c "path/to/collection url"`
+* with import type parameter **drupal only**:
+    * `ruby run_import_photo.rb -p /path/to/wip -i "drupal only" -f /path/to/file/containing/se_list -c "path/to/collection url"`
 * with import type parameter **mongo only**:
     * `ruby run_import_photo.rb -p /path/to/wip -i "mongo only" -f /path/to/se_list`
