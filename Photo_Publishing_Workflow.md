@@ -43,6 +43,7 @@ The user `cd`s to the directory containing the publishing scripts and runs eithe
  It's now time for updating handles and/or updating the Archives Space record with a digital object containing the handle value
 
  #### Handle updates
+ * More usage info is available in the handle scripts repo: [here](https://v3.es.its.nyu.edu/dlts/handle_scripts#set_handle_viewer_photo_set-rb). Please read below for more details on how to update images depending on whether it's an image set or to be displayed as thumbnails. 
  * For images, handles need to be updated one of two ways depending on how the images are to be viewed.
      * for thumbnail views, cd  to where the handle scripts live. Run the handle update script like so:
          * `$ ruby set_handle_viewer_photo_set.rb /path/to/WIPs /file/containing/listOfSeS/ [what host - dev/stage/prod] tn`
@@ -53,6 +54,7 @@ The user `cd`s to the directory containing the publishing scripts and runs eithe
       * `$ ruby set_handle_viewer_photo_set.rb /path/to/WIPs /file/containing/listOfSeS/ [what host - dev/stage/prod] all`
       * For ex:
       `$ ruby set_handle_viewer_photo_set.rb /path/to/WIPs /file/containing/listOfSeS/ dev all`
+
 
  #### ASpace DO update
  * This step is for collections from Archives Space. The wrapper script calls a pre-existing script which does the heavy lifting of updating a digital object with a handle value. **Please notify ACM when doing this step.**
